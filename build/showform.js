@@ -4,4 +4,4 @@ var HelloMessage = React.createClass({displayName: "HelloMessage",
   }
 });
 
-React.render(React.createElement(HelloMessage, {name: "John"}), document.getElementById('myDiv'));
+React.render(React.createElement(HelloMessage, {name: "John"}), document.getElementById('showForm'));
