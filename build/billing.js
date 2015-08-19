@@ -1,16 +1,9 @@
-var STATES = [
-  'AL', 'AK', 'AS', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI',
-  'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS',
-  'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR',
-  'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
-]
 
-var Example = React.createClass({displayName: "Example",
+
+var Billing = React.createClass({displayName: "Billing",
   getInitialState: function() {
     return {
-      email: true
-    , question: true
-    , submitted: null
+      submitted: null
     }
   }
 
@@ -18,7 +11,7 @@ var Example = React.createClass({displayName: "Example",
     var submitted
     if (this.state.submitted !== null) {
       submitted = React.createElement("div", {className: "alert alert-success"}, 
-        React.createElement("p", null, "ContactForm data:"), 
+        React.createElement("p", null, "Billing data:"), 
         React.createElement("pre", null, React.createElement("code", null, JSON.stringify(this.state.submitted, null, '  ')))
       )
     }
@@ -26,32 +19,13 @@ var Example = React.createClass({displayName: "Example",
     return React.createElement("div", null, 
       React.createElement("div", {className: "panel panel-default"}, 
         React.createElement("div", {className: "panel-heading clearfix"}, 
-          React.createElement("h3", {className: "panel-title pull-left"}, "Contact Form example - ", React.createElement("a", {href: "http://bl.ocks.org/insin/8418675"}, "link"), " "), 
-          React.createElement("div", {className: "pull-right"}, 
-            React.createElement("label", {className: "checkbox-inline"}, 
-              React.createElement("input", {type: "checkbox", 
-                checked: this.state.email, 
-                onChange: this.handleChange.bind(this, 'email')}
-              ), " Email"
-            ), 
-            React.createElement("label", {className: "checkbox-inline"}, 
-              React.createElement("input", {type: "checkbox", 
-                checked: this.state.question, 
-                onChange: this.handleChange.bind(this, 'question')}
-              ), " Question"
-            )
-          )
+          React.createElement("h3", {className: "panel-title pull-left"}, "Billing example")
         ), 
         React.createElement("div", {className: "panel-body"}, 
-          React.createElement(ContactForm, {ref: "contactForm", 
-            email: this.state.email, 
-            question: this.state.question, 
-            company: this.props.company}
+          React.createElement(ContactForm, {ref: "contactForm"}
           )
-        ), 
-        React.createElement("div", {className: "panel-footer"}, 
-          React.createElement("button", {type: "button", className: "btn btn-primary btn-block", onClick: this.handleSubmit}, "Submit")
         )
+
       ), 
       submitted
     )
@@ -76,8 +50,6 @@ var Example = React.createClass({displayName: "Example",
 var ContactForm = React.createClass({displayName: "ContactForm",
   getDefaultProps: function() {
     return {
-      email: true
-    , question: false
     }
   }
 
@@ -86,9 +58,7 @@ var ContactForm = React.createClass({displayName: "ContactForm",
   }
 
 , isValid: function() {
-    var fields = ['firstName', 'lastName', 'phoneNumber', 'address', 'city', 'state', 'zipCode']
-    if (this.props.email) fields.push('email')
-    if (this.props.question) fields.push('question')
+    var fields = ['number', 'cvc', 'expMonth', 'expYear']
 
     var errors = {}
     fields.forEach(function(field) {
@@ -109,39 +79,32 @@ var ContactForm = React.createClass({displayName: "ContactForm",
 
 , getFormData: function() {
     var data = {
-      firstName: this.refs.firstName.getDOMNode().value
-    , lastName: this.refs.lastName.getDOMNode().value
-    , phoneNumber: this.refs.phoneNumber.getDOMNode().value
-    , address: this.refs.address.getDOMNode().value
-    , city: this.refs.city.getDOMNode().value
-    , state: this.refs.state.getDOMNode().value
-    , zipCode: this.refs.zipCode.getDOMNode().value
-    , currentCustomer: this.refs.currentCustomerYes.getDOMNode().checked
+      number: this.refs.number.getDOMNode().value
+    , cvc: this.refs.cvc.getDOMNode().value
+    , expMonth: this.refs.exp-month.getDOMNode().value
+    , expYear: this.refs.exp-year.getDOMNode().value
     }
     return data
   }
 
 , render: function() {
     return React.createElement("div", {className: "form-horizontal"}, 
-      this.renderTextInput('firstName', 'First Name'), 
-      this.renderTextInput('lastName', 'Last Name'), 
-      this.renderTextInput('phoneNumber', 'Phone number'), 
-      this.props.email && this.renderTextInput('email', 'Email'), 
-      this.props.question && this.renderTextarea('question', 'Question'), 
-      this.renderTextInput('address', 'Address'), 
-      this.renderTextInput('city', 'City'), 
-      this.renderSelect('state', 'State', STATES), 
-      this.renderTextInput('zipCode', 'Zip Code'), 
-      this.renderRadioInlines('currentCustomer', 'Are you currently a ' + this.props.company + ' Customer?', {
-        values: ['Yes', 'No']
-      , defaultCheckedValue: 'No'
-      })
+      React.createElement("form", {action: "payment.php", method: "POST", id: "payment-form"}, 
+       React.createElement("span", {class: "payment-errors"}), 
+      this.renderTextInput('number', 'CC number'), 
+      this.renderTextInput('cvc', 'CVC'), 
+      this.renderTextInput('expMonth', 'Exp month'), 
+      this.renderTextInput('expYear', 'Exp year'), 
+              React.createElement("div", {className: "panel-footer"}, 
+          React.createElement("button", {type: "submit", className: "btn btn-primary btn-block", onClick: this.handleSubmit}, "Submit")
+        )
+      )
     )
   }
 
 , renderTextInput: function(id, label) {
     return this.renderField(id, label,
-      React.createElement("input", {type: "text", className: "form-control", id: id, ref: id})
+      React.createElement("input", {type: "number", className: "form-control", "data-stripe": id, ref: id})
     )
   }
 
@@ -183,7 +146,7 @@ var ContactForm = React.createClass({displayName: "ContactForm",
   }
 })
 
-React.render(React.createElement(Example, {company: "Kaywa"}), document.getElementById('contactform'))
+React.render(React.createElement(Billing, null), document.getElementById('billing'))
 
 // Utils
 

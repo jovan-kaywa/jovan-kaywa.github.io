@@ -1,16 +1,9 @@
-var STATES = [
-  'AL', 'AK', 'AS', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI',
-  'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS',
-  'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR',
-  'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
-]
 
-var Example = React.createClass({
+
+var Billing = React.createClass({
   getInitialState: function() {
     return {
-      email: true
-    , question: true
-    , submitted: null
+      submitted: null
     }
   }
 
@@ -18,7 +11,7 @@ var Example = React.createClass({
     var submitted
     if (this.state.submitted !== null) {
       submitted = <div className="alert alert-success">
-        <p>ContactForm data:</p>
+        <p>Billing data:</p>
         <pre><code>{JSON.stringify(this.state.submitted, null, '  ')}</code></pre>
       </div>
     }
@@ -26,32 +19,13 @@ var Example = React.createClass({
     return <div>
       <div className="panel panel-default">
         <div className="panel-heading clearfix">
-          <h3 className="panel-title pull-left">Contact Form example - <a href="http://bl.ocks.org/insin/8418675">link</a> </h3>
-          <div className="pull-right">
-            <label className="checkbox-inline">
-              <input type="checkbox"
-                checked={this.state.email}
-                onChange={this.handleChange.bind(this, 'email')}
-              /> Email
-            </label>
-            <label className="checkbox-inline">
-              <input type="checkbox"
-                checked={this.state.question}
-                onChange={this.handleChange.bind(this, 'question')}
-              /> Question
-            </label>
-          </div>
+          <h3 className="panel-title pull-left">Billing example</h3>
         </div>
         <div className="panel-body">
           <ContactForm ref="contactForm"
-            email={this.state.email}
-            question={this.state.question}
-            company={this.props.company}
           />
         </div>
-        <div className="panel-footer">
-          <button type="button" className="btn btn-primary btn-block" onClick={this.handleSubmit}>Submit</button>
-        </div>
+
       </div>
       {submitted}
     </div>
@@ -76,8 +50,6 @@ var Example = React.createClass({
 var ContactForm = React.createClass({
   getDefaultProps: function() {
     return {
-      email: true
-    , question: false
     }
   }
 
@@ -86,9 +58,7 @@ var ContactForm = React.createClass({
   }
 
 , isValid: function() {
-    var fields = ['firstName', 'lastName', 'phoneNumber', 'address', 'city', 'state', 'zipCode']
-    if (this.props.email) fields.push('email')
-    if (this.props.question) fields.push('question')
+    var fields = ['number', 'cvc', 'expMonth', 'expYear']
 
     var errors = {}
     fields.forEach(function(field) {
@@ -109,39 +79,32 @@ var ContactForm = React.createClass({
 
 , getFormData: function() {
     var data = {
-      firstName: this.refs.firstName.getDOMNode().value
-    , lastName: this.refs.lastName.getDOMNode().value
-    , phoneNumber: this.refs.phoneNumber.getDOMNode().value
-    , address: this.refs.address.getDOMNode().value
-    , city: this.refs.city.getDOMNode().value
-    , state: this.refs.state.getDOMNode().value
-    , zipCode: this.refs.zipCode.getDOMNode().value
-    , currentCustomer: this.refs.currentCustomerYes.getDOMNode().checked
+      number: this.refs.number.getDOMNode().value
+    , cvc: this.refs.cvc.getDOMNode().value
+    , expMonth: this.refs.exp-month.getDOMNode().value
+    , expYear: this.refs.exp-year.getDOMNode().value
     }
     return data
   }
 
 , render: function() {
     return <div className="form-horizontal">
-      {this.renderTextInput('firstName', 'First Name')}
-      {this.renderTextInput('lastName', 'Last Name')}
-      {this.renderTextInput('phoneNumber', 'Phone number')}
-      {this.props.email && this.renderTextInput('email', 'Email')}
-      {this.props.question && this.renderTextarea('question', 'Question')}
-      {this.renderTextInput('address', 'Address')}
-      {this.renderTextInput('city', 'City')}
-      {this.renderSelect('state', 'State', STATES)}
-      {this.renderTextInput('zipCode', 'Zip Code')}
-      {this.renderRadioInlines('currentCustomer', 'Are you currently a ' + this.props.company + ' Customer?', {
-        values: ['Yes', 'No']
-      , defaultCheckedValue: 'No'
-      })}
+      <form action="payment.php" method="POST" id="payment-form">
+       <span class="payment-errors"></span>
+      {this.renderTextInput('number', 'CC number')}
+      {this.renderTextInput('cvc', 'CVC')}
+      {this.renderTextInput('expMonth', 'Exp month')}
+      {this.renderTextInput('expYear', 'Exp year')}
+              <div className="panel-footer">
+          <button type="submit" className="btn btn-primary btn-block" onClick={this.handleSubmit}>Submit</button>
+        </div>
+      </form>
     </div>
   }
 
 , renderTextInput: function(id, label) {
     return this.renderField(id, label,
-      <input type="text" className="form-control" id={id} ref={id}/>
+      <input type="number" className="form-control" data-stripe={id} ref={id}/>
     )
   }
 
@@ -183,7 +146,7 @@ var ContactForm = React.createClass({
   }
 })
 
-React.render(<Example company="Kaywa"/>, document.getElementById('contactform'))
+React.render(<Billing />, document.getElementById('billing'))
 
 // Utils
 
